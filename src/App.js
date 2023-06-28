@@ -1,18 +1,26 @@
-import {useState, useEffect}from 'react';
-//import * as mobilenet from "@tensorflow-models/mobilenet";
+import { useState, useEffect, useRef } from 'react';
+import * as mobilenet from "@tensorflow-models/mobilenet";
 
 function App() {
-  const [isModelLoading, setIsModelLoading]=useState(false) // pentru afisarea Loadingului
+  const [isModelLoading, setIsModelLoading]=useState(false) // pentru afisarea Loading
   const [model, setModel]=useState(null)  //model - state null
   const [imageURL, setImageURL] = useState(null);
+  const [results, setResults] = useState([])
+
+  const imageRef = useRef()
 
   const loadModel = async () => {
     setIsModelLoading(true);
-    // Simulează încărcarea modelului
-    setTimeout(() => {
+    try {
+      const loadedModel = await mobilenet.load();
+      setModel(loadedModel);
       setIsModelLoading(false);
-    }, 2000); // După 2 secunde, se oprește afișarea "Model Loading..."
+    } catch (error) {
+      console.log("Error loading model:", error);
+      setIsModelLoading(false);
+    }
   };
+  
 
 const uploadImage = (e) => {
   const { files } = e.target
@@ -24,16 +32,25 @@ setImageURL(url)
   }
 }
 
+const identify = async () => {
+  if (model) {
+    const results = await model.classify(imageRef.current);
+    setResults(results)
+  } else {
+    console.log("Model is not loaded yet");
+  }
+}
+
 
 useEffect(() =>{
    loadModel()
 },[])
 
 if (isModelLoading){
-  return <h2>Model Loaging . . .</h2>
+  return <h2>Model Loading . . .</h2>
 }
 
-console. log(imageURL)
+console.log(results)
 
 
   return (
@@ -43,7 +60,25 @@ console. log(imageURL)
         <input type='file' accept='image/*' capture='camera' className='uploadInput'
         onChange={uploadImage}/>
       </div>
-      
+      <div className="mainWrapper">
+        <div className="mainContent">
+          <div className="imageHolder">
+            {imageURL && <img src={imageURL} alt="Upload Preview"
+            crossOrigin="anonymous" ref={imageRef} />}
+          </div>
+          {results.length > 0 && <div className='resultsHolder'>
+            {results.map((result, index) => {
+              return (
+                <div className='result' key={result.className}>
+                   <span className='name'>{result.className}</span>
+                   <span className='confidence'>Confidence level: {(result.probability * 100).toFixed(2)}% {index === 0 && <span className='bestGuess'>Best Guess</span>}</span>
+            </div>
+            )
+            })}
+          </div>}
+        </div>
+        {imageURL && <button className='button' onClick={identify}>Identify Image</button>}
+      </div>
     </div>
   );
 }

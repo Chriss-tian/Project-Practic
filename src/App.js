@@ -8,6 +8,8 @@ function App() {
   const [results, setResults] = useState([])
 
   const imageRef = useRef()
+  const textInputRef = useRef()
+  const fileInputRef = useRef()
 
   const loadModel = async () => {
     setIsModelLoading(true);
@@ -33,6 +35,7 @@ setImageURL(url)
 }
 
 const identify = async () => {
+  textInputRef.current.value=''
   if (model) {
     const results = await model.classify(imageRef.current);
     setResults(results)
@@ -41,6 +44,14 @@ const identify = async () => {
   }
 }
 
+const handleOnChange = (e) => {
+  setImageURL(e.target.value)
+  setResults([])
+}
+
+const triggerUpload = () => {
+  fileInputRef.current.click()
+}
 
 useEffect(() =>{
    loadModel()
@@ -57,8 +68,18 @@ console.log(results)
     <div className="App">
       <h1 className='header'>Image Identification</h1>
       <div className='inputHolder'>
-        <input type='file' accept='image/*' capture='camera' className='uploadInput'
-        onChange={uploadImage}/>
+        
+         <input type='file' accept='image/*' capture='camera' className='uploadInput'
+        onChange={uploadImage} ref={fileInputRef} /> 
+
+
+       
+        <button className='uploadImage' onClick={triggerUpload}>Upload Image</button>
+        
+        <span className='or'>OR</span>
+
+        <input type="text" placeholder='Paste image URL' ref={textInputRef} onChange={handleOnChange}/>
+
       </div>
       <div className="mainWrapper">
         <div className="mainContent">

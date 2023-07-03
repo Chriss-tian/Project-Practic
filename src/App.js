@@ -72,11 +72,9 @@ console.log(results)
          <input type='file' accept='image/*' capture='camera' className='uploadInput'
         onChange={uploadImage} ref={fileInputRef} /> 
 
-
-       
         <button className='uploadImage' onClick={triggerUpload}>Upload Image</button>
         
-        <span className='or'>OR</span>
+       <span className='or'>OR</span>
 
         <input type="text" placeholder='Paste image URL' ref={textInputRef} onChange={handleOnChange}/>
 
